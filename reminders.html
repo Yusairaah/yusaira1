@@ -217,7 +217,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 <script>
 async function loadReminders() {
-  const res = await fetch("https://backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/reminders");
+  const res = await fetch("https://backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/api/reminders");
   const data = await res.json();
 
   const container = document.querySelector(".reminder-cards");
