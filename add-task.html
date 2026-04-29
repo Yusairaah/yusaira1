@@ -293,18 +293,16 @@ async function saveTask() {
 
   const user_id = 1; // temporary (later from login)
 
-  const res = await fetch("https://backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/add-task", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user_id,
-      title,
-      description,
-      deadline
-    })
-  });
+  fetch("https://backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/add-task", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    title,
+    description,
+    deadline,
+    user_id
+  })
+});
 
   const data = await res.json();
 
