@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TaskFlow — Add Task</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#131929;--border:#1e2d45;
+  --accent:#4f8ef7;--accent2:#7c3aed;
+  --text:#e8edf5;--muted:#6b7f99;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;
+  --card:#16213a;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+
+.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;position:sticky;top:0;height:100vh;}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:36px;}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.logo-text{font-family:'DM Serif Display',serif;font-size:18px;}
+.nav-label{font-size:10px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;padding:0 8px;margin-bottom:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:var(--muted);cursor:pointer;transition:all 0.15s;text-decoration:none;margin-bottom:2px;}
+.nav-item:hover{background:var(--card);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,0.15);color:var(--accent);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-bottom{margin-top:auto;}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#fff;flex-shrink:0;}
+
+.main{flex:1;display:flex;flex-direction:column;}
+.topbar{display:flex;align-items:center;gap:16px;padding:20px 32px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10;}
+.back-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+.back-btn:hover{background:var(--surface);color:var(--text);}
+.topbar h1{font-family:'DM Serif Display',serif;font-size:22px;}
+
+.content{padding:32px;max-width:680px;}
+
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.form-row{margin-bottom:22px;}
+.form-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;display:block;}
+.form-input{
+  width:100%;padding:12px 16px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;
+  transition:border-color 0.15s,box-shadow 0.15s;outline:none;
+}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,0.12);}
+.form-input::placeholder{color:var(--muted);}
+textarea.form-input{resize:vertical;min-height:100px;}
+select.form-input{cursor:pointer;}
+select.form-input option{background:var(--surface);}
+
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;}
+
+.priority-btns{display:flex;gap:10px;}
+.p-btn{
+  flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);
+  background:transparent;color:var(--muted);font-size:13px;cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.p-btn:hover{border-color:var(--muted);color:var(--text);}
+.p-btn.active-high{border-color:var(--danger);background:rgba(239,68,68,0.12);color:var(--danger);}
+.p-btn.active-med{border-color:var(--warning);background:rgba(245,158,11,0.12);color:var(--warning);}
+.p-btn.active-low{border-color:var(--success);background:rgba(34,197,94,0.12);color:var(--success);}
+
+.upload-zone{
+  border:2px dashed var(--border);border-radius:12px;padding:32px;
+  text-align:center;cursor:pointer;transition:all 0.15s;
+  background:var(--surface);
+}
+.upload-zone:hover{border-color:var(--accent);background:rgba(79,142,247,0.05);}
+.upload-zone.dragging{border-color:var(--accent);background:rgba(79,142,247,0.08);}
+.upload-icon{font-size:28px;margin-bottom:8px;}
+.upload-text{font-size:14px;color:var(--muted);}
+.upload-text span{color:var(--accent);cursor:pointer;}
+.upload-hint{font-size:11px;color:var(--muted);margin-top:4px;}
+
+.file-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.file-chip{
+  display:flex;align-items:center;gap:8px;padding:7px 12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;
+}
+.file-chip-remove{color:var(--muted);cursor:pointer;font-size:14px;line-height:1;}
+.file-chip-remove:hover{color:var(--danger);}
+
+.reminder-toggles{display:flex;flex-direction:column;gap:10px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+.toggle-label{font-size:14px;}
+.toggle-sub{font-size:12px;color:var(--muted);}
+.toggle{position:relative;width:40px;height:22px;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{
+  position:absolute;inset:0;border-radius:22px;background:var(--border);
+  transition:background 0.2s;cursor:pointer;
+}
+.toggle-slider::before{
+  content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;
+  border-radius:50%;background:#fff;transition:transform 0.2s;
+}
+.toggle input:checked+.toggle-slider{background:var(--accent);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);}
+
+.form-actions{display:flex;gap:12px;margin-top:8px;}
+.btn{padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--accent);color:#fff;flex:1;}
+.btn-primary:hover{background:#3a7ef6;transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-outline:hover{background:var(--surface);}
+
+.success-toast{
+  display:none;position:fixed;bottom:24px;right:24px;
+  background:var(--success);color:#fff;padding:14px 20px;border-radius:12px;
+  font-size:14px;font-weight:500;z-index:100;
+  animation:slideIn 0.3s cubic-bezier(.22,1,.36,1);
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">✓</div>
+    <span class="logo-text">TaskFlow</span>
+  </div>
+  <div class="nav-label">Menu</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">◼</span> Dashboard</a>
+  <a href="add-task.html" class="nav-item active"><span class="icon">+</span> Add task</a>
+  <a href="reminders.html" class="nav-item"><span class="icon">🔔</span> Reminders</a>
+  <div class="nav-label" style="margin-top:24px;">Categories</div>
+  <div class="nav-item"><span class="icon">💼</span> Work</div>
+  <div class="nav-item"><span class="icon">👤</span> Personal</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar">JD</div>
+
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+    <h1>Add new task</h1>
+  </div>
+  <div class="content">
+    <div class="form-card">
+
+      <div class="form-row">
+        <label class="form-label">Task title *</label>
+        <input class="form-input" type="text" id="title" placeholder="What needs to be done?" />
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Description</label>
+        <textarea class="form-input" id="desc" placeholder="Add more details about this task…"></textarea>
+      </div>
+
+      <div class="form-row-2">
+        <div>
+          <label class="form-label">Deadline date *</label>
+          <input class="form-input" type="date" id="date" />
+        </div>
+        <div>
+          <label class="form-label">Deadline time</label>
+          <input class="form-input" type="time" id="time" value="09:00" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div>
+          <label class="form-label">Category</label>
+          <select class="form-input" id="category">
+            <option value="work">💼 Work</option>
+            <option value="personal">👤 Personal</option>
+            <option value="urgent">🚨 Urgent</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Assigned to</label>
+          <input class="form-input" type="text" placeholder="johndoe@company.com" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Priority</label>
+        <div class="priority-btns">
+          <button class="p-btn" id="p-high" onclick="setPriority('high')">🔴 High</button>
+          <button class="p-btn active-med" id="p-med" onclick="setPriority('med')">🟡 Medium</button>
+          <button class="p-btn" id="p-low" onclick="setPriority('low')">🟢 Low</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Attachments (optional)</label>
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">Drop files here or <span>browse</span></div>
+          <div class="upload-hint">Stored in Azure Blob Storage · Max 25MB per file</div>
+          <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this.files)"/>
+        </div>
+        <div class="file-preview" id="file-preview"></div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Reminder settings</label>
+        <div class="reminder-toggles">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Email reminder</div>
+              <div class="toggle-sub">Send alert to johndoe@company.com</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">SMS reminder</div>
+              <div class="toggle-sub">Send SMS via Azure Logic Apps</div>
+            </div>
+            <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Remind me 1 hour before</div>
+              <div class="toggle-sub">Azure Functions timer trigger</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTask()">Save task →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="success-toast" id="toast">✓ Task saved successfully!</div>
+
+<script>
+let priority='med';
+let files=[];
+
+function setPriority(p){
+  priority=p;
+  document.getElementById('p-high').className='p-btn'+(p==='high'?' active-high':'');
+  document.getElementById('p-med').className='p-btn'+(p==='med'?' active-med':'');
+  document.getElementById('p-low').className='p-btn'+(p==='low'?' active-low':'');
+}
+
+function handleFiles(fileList){
+  Array.from(fileList).forEach(f=>{
+    if(!files.find(x=>x.name===f.name))files.push(f);
+  });
+  renderFiles();
+}
+
+function renderFiles(){
+  const preview=document.getElementById('file-preview');
+  preview.innerHTML=files.map((f,i)=>`
+    <div class="file-chip">
+      📄 ${f.name}
+      <span class="file-chip-remove" onclick="removeFile(${i})">✕</span>
+    </div>
+  `).join('');
+}
+
+function removeFile(i){ files.splice(i,1); renderFiles(); }
+
+function handleDrag(e,over){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.toggle('dragging',over);
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragging');
+  handleFiles(e.dataTransfer.files);
+}
+
+async function saveTask() {
+  const title = document.getElementById("title").value;
+  const description = document.getElementById("desc").value;
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+
+  const deadline = date + " " + time;
+
+  const user_id = 1; // temporary (later from login)
+
+  const res = await fetch("http://localhost:3000/add-task", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id,
+      title,
+      description,
+      deadline
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert("Task saved!");
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Error saving task");
+  }
+}
+
+async function saveTask() {
+  const title = document.getElementById("title").value;
+  const description = document.getElementById("desc").value;
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+
+  const deadline = date + " " + time;
+
+  const res = await fetch("http://localhost:3000/add-task", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: 1,
+      title,
+      description,
+      deadline
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert("Task saved successfully!");
+
+    // 🔥 optional but important for your badge system
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Error saving task");
+  }
+}
+</script>
+</body>
+</html>

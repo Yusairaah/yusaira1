@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TaskFlow — Reminders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#131929;--border:#1e2d45;
+  --accent:#4f8ef7;--accent2:#7c3aed;
+  --text:#e8edf5;--muted:#6b7f99;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;
+  --card:#16213a;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;position:sticky;top:0;height:100vh;}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:36px;}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.logo-text{font-family:'DM Serif Display',serif;font-size:18px;}
+.nav-label{font-size:10px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;padding:0 8px;margin-bottom:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;color:var(--muted);cursor:pointer;transition:all 0.15s;text-decoration:none;margin-bottom:2px;}
+.nav-item:hover{background:var(--card);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,0.15);color:var(--accent);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-bottom{margin-top:auto;}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#fff;flex-shrink:0;}
+
+.main{flex:1;display:flex;flex-direction:column;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10;}
+.topbar h1{font-family:'DM Serif Display',serif;font-size:24px;}
+.btn{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#3a7ef6;}
+
+.content{padding:28px 32px;overflow-y:auto;flex:1;}
+
+.section-title{font-size:14px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;}
+
+.reminder-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:36px;}
+.reminder-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;display:flex;align-items:center;gap:16px;
+  animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.reminder-icon{
+  width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.icon-email{background:rgba(79,142,247,0.15);}
+.icon-sms{background:rgba(34,197,94,0.15);}
+.icon-overdue{background:rgba(239,68,68,0.15);}
+.icon-upcoming{background:rgba(245,158,11,0.15);}
+.reminder-body{flex:1;}
+.reminder-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.reminder-meta{font-size:12px;color:var(--muted);}
+.status-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.pill-sent{background:rgba(34,197,94,0.15);color:var(--success);}
+.pill-pending{background:rgba(245,158,11,0.15);color:var(--warning);}
+.pill-failed{background:rgba(239,68,68,0.15);color:var(--danger);}
+
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:36px;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;padding-bottom:0;}
+.setting-row:first-child{padding-top:0;}
+.setting-label{font-size:14px;font-weight:500;}
+.setting-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;border-radius:22px;background:var(--border);transition:background 0.2s;cursor:pointer;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;transition:transform 0.2s;}
+.toggle input:checked+.toggle-slider{background:var(--accent);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);}
+
+.select-sm{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;outline:none;}
+.select-sm option{background:var(--surface);}
+
+.azure-status{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.az-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.az-item:last-child{border-bottom:none;padding-bottom:0;}
+.az-item:first-child{padding-top:0;}
+.az-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.az-dot.on{background:var(--success);box-shadow:0 0 6px var(--success);}
+.az-dot.off{background:var(--muted);}
+.az-name{font-size:13px;font-weight:500;flex:1;}
+.az-detail{font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">✓</div>
+    <span class="logo-text">TaskFlow</span>
+  </div>
+  <div class="nav-label">Menu</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">◼</span> Dashboard</a>
+  <a href="add-task.html" class="nav-item"><span class="icon">+</span> Add task</a>
+  <a href="reminders.html" class="nav-item active"><span class="icon">🔔</span> Reminders</a>
+  <div class="nav-label" style="margin-top:24px;">Categories</div>
+  <div class="nav-item"><span class="icon">💼</span> Work</div>
+  <div class="nav-item"><span class="icon">👤</span> Personal</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+
+
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <h1>Reminders</h1>
+    <button class="btn btn-primary" onclick="window.location.href='add-task.html'">+ New task</button>
+  </div>
+  <div class="content">
+
+    <div class="section-title">Recent alerts</div>
+    <div class="reminder-cards">
+      <div class="reminder-card" style="animation-delay:.05s">
+        <div class="reminder-icon icon-overdue">⚠️</div>
+        <div class="reminder-body">
+          <div class="reminder-title">Review Logic Apps email workflow</div>
+          <div class="reminder-meta">Overdue · Email sent · Yesterday 3:00 PM</div>
+        </div>
+        <span class="status-pill pill-sent">Sent</span>
+      </div>
+      <div class="reminder-card" style="animation-delay:.1s">
+        <div class="reminder-icon icon-upcoming">⏰</div>
+        <div class="reminder-body">
+          <div class="reminder-title">Submit project report to Azure portal</div>
+          <div class="reminder-meta">Due today · Email + SMS · 1 hour before</div>
+        </div>
+        <span class="status-pill pill-pending">Pending</span>
+      </div>
+      <div class="reminder-card" style="animation-delay:.15s">
+        <div class="reminder-icon icon-email">📧</div>
+        <div class="reminder-body">
+          <div class="reminder-title">Buy groceries for the week</div>
+          <div class="reminder-meta">Due today 8:00 PM · Email only · johndoe@company.com</div>
+        </div>
+        <span class="status-pill pill-pending">Pending</span>
+      </div>
+      <div class="reminder-card" style="animation-delay:.2s">
+        <div class="reminder-icon icon-sms">💬</div>
+        <div class="reminder-body">
+          <div class="reminder-title">Write unit tests for Azure Functions</div>
+          <div class="reminder-meta">Completed · SMS sent · Apr 23, 2:00 PM</div>
+        </div>
+        <span class="status-pill pill-sent">Sent</span>
+      </div>
+    </div>
+
+    <div class="section-title">Reminder settings</div>
+    <div class="settings-card" style="margin-bottom:24px;">
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Email alerts</div>
+          <div class="setting-sub">via Azure Logic Apps + SendGrid</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">SMS alerts</div>
+          <div class="setting-sub">via Azure Logic Apps + Twilio</div>
+        </div>
+        <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Remind me before deadline</div>
+          <div class="setting-sub">Azure Functions timer trigger interval</div>
+        </div>
+        <select class="select-sm">
+          <option>15 minutes</option>
+          <option selected>1 hour</option>
+          <option>3 hours</option>
+          <option>1 day</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Overdue alerts</div>
+          <div class="setting-sub">Notify when task passes deadline</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="section-title">Azure services status</div>
+    <div class="azure-status">
+      <div class="az-item">
+        <div class="az-dot on"></div>
+        <div class="az-name">Azure Functions</div>
+        <div class="az-detail">Timer trigger · Running every minute</div>
+      </div>
+      <div class="az-item">
+        <div class="az-dot on"></div>
+        <div class="az-name">Logic Apps</div>
+        <div class="az-detail">Email workflow · Active</div>
+      </div>
+      <div class="az-item">
+        <div class="az-dot off"></div>
+        <div class="az-name">SMS (Twilio)</div>
+        <div class="az-detail">Not configured</div>
+      </div>
+      <div class="az-item">
+        <div class="az-dot on"></div>
+        <div class="az-name">Azure SQL</div>
+        <div class="az-detail">Connected · 5 tasks stored</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+async function loadReminders() {
+  const res = await fetch("http://localhost:3000/api/reminders");
+  const data = await res.json();
+
+  const container = document.querySelector(".reminder-cards");
+  container.innerHTML = "";
+
+  data.forEach(task => {
+    const card = document.createElement("div");
+    card.className = "reminder-card";
+
+    let statusClass = task.status === "notified" ? "pill-sent" : "pill-pending";
+
+    card.innerHTML = `
+      <div class="reminder-icon icon-overdue">⚠️</div>
+      <div class="reminder-body">
+        <div class="reminder-title">${task.title}</div>
+        <div class="reminder-meta">
+          Deadline: ${new Date(task.deadline).toLocaleString()}
+        </div>
+      </div>
+      <span class="status-pill ${statusClass}">
+        ${task.status}
+      </span>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", loadReminders);
+</script>
+</body>
+</html>

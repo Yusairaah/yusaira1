@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TaskFlow — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;
+  --surface:#131929;
+  --border:#1e2d45;
+  --accent:#4f8ef7;
+  --accent2:#7c3aed;
+  --text:#e8edf5;
+  --muted:#6b7f99;
+  --success:#22c55e;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --card:#16213a;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+
+/* Sidebar */
+.sidebar{
+  width:240px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:24px 16px;
+  position:sticky;top:0;height:100vh;
+}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:36px;}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.logo-text{font-family:'DM Serif Display',serif;font-size:18px;}
+
+.nav-label{font-size:10px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;padding:0 8px;margin-bottom:8px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  font-size:14px;color:var(--muted);cursor:pointer;transition:all 0.15s;
+  text-decoration:none;margin-bottom:2px;
+}
+.nav-item:hover{background:var(--card);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,0.15);color:var(--accent);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;}
+.badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+
+.sidebar-bottom{margin-top:auto;}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#fff;flex-shrink:0;}
+.user-name{font-size:13px;font-weight:500;}
+.user-role{font-size:11px;color:var(--muted);}
+
+/* Main */
+/* Custom style for the Reminder button to match Logout button */
+.notif-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px !important; /* Adjusted to fit icon + text */
+  position: relative;
+  min-width: 85px;
+}
+
+/* Wrapper for icon and badge to handle absolute positioning */
+.icon-container {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+/* The 3D Bell Image */
+.bell-img {
+  width: 24px; /* Adjust based on your image size */
+  height: auto;
+  display: block;
+}
+
+/* The Red Notification Badge */
+.notif-btn .badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #ff4d4d; /* Matches the red in your image */
+  color: white;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 2px solid var(--bg); /* Creates the "cut-out" look */
+  padding: 0;
+  margin: 0;
+}
+
+/* Text label below the bell */
+.btn-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{
+  .topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;border-bottom:1px solid var(--border);
+  background:var(--bg);position:sticky;top:0;z-index:10;
+}
+.topbar h1{font-family:'DM Serif Display',serif;font-size:24px;}
+.topbar-actions{display:flex;align-items:center;gap:12px;}
+.btn{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#3a7ef6;transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-outline:hover{background:var(--surface);}
+
+.content{padding:28px 32px;overflow-y:auto;flex:1;}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px;position:relative;overflow:hidden;
+  animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;
+}
+.stat-card:nth-child(1){animation-delay:.05s}
+.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.15s}
+.stat-card:nth-child(4){animation-delay:.2s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.stat-num{font-family:'DM Serif Display',serif;font-size:36px;line-height:1;margin-bottom:4px;}
+.stat-label{font-size:12px;color:var(--muted);}
+.stat-dot{position:absolute;top:20px;right:20px;width:8px;height:8px;border-radius:50%;}
+@keyframes ring {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(10deg); }
+  75% { transform: rotate(-10deg); }
+  100% { transform: rotate(0); }
+}
+
+.notif-btn:hover img {
+  animation: ring 0.2s ease-in-out infinite;
+}
+
+/* Task list */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-size:16px;font-weight:500;}
+.filter-tabs{display:flex;gap:8px;}
+.tab{padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.tab:hover:not(.active){background:var(--surface);color:var(--text);}
+
+.task-list{display:flex;flex-direction:column;gap:10px;}
+.task-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:16px 20px;display:flex;align-items:center;gap:16px;
+  transition:border-color 0.15s,transform 0.15s;cursor:pointer;
+  animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;
+}
+.task-card:hover{border-color:var(--accent);transform:translateX(2px);}
+.task-check{
+  width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;cursor:pointer;
+}
+.task-check:hover{border-color:var(--accent);}
+.task-check.checked{background:var(--success);border-color:var(--success);}
+.task-check.checked::after{content:'✓';font-size:11px;color:#fff;font-weight:700;}
+.task-body{flex:1;}
+.task-title{font-size:14px;font-weight:500;margin-bottom:4px;}
+.task-title.done{text-decoration:line-through;color:var(--muted);}
+.task-meta{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted);}
+.task-tag{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:500;}
+.tag-work{background:rgba(79,142,247,0.15);color:var(--accent);}
+.tag-personal{background:rgba(124,58,237,0.15);color:#a78bfa;}
+.tag-urgent{background:rgba(239,68,68,0.15);color:var(--danger);}
+.deadline{display:flex;align-items:center;gap:4px;}
+.deadline.soon{color:var(--warning);}
+.deadline.overdue{color:var(--danger);}
+.task-attach{font-size:18px;color:var(--muted);}
+.priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.p-high{background:var(--danger);}
+.p-med{background:var(--warning);}
+.p-low{background:var(--success);}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">✓</div>
+    <span class="logo-text">TaskFlow</span>
+  </div>
+
+  <div class="nav-label">Menu</div>
+  <a href="dashboard.html" class="nav-item active">
+    <span class="icon">◼</span> Dashboard
+    <span class="badge" id="total-badge">5</span>
+  </a>
+  <a href="add-task.html" class="nav-item">
+    <span class="icon">+</span> Add task
+  </a>
+  <a href="reminders.html" class="nav-item">
+    <span class="icon">🔔</span> Reminders
+  </a>
+
+  <div class="nav-label" style="margin-top:24px;">Categories</div>
+  <div class="nav-item"><span class="icon">💼</span> Work</div>
+  <div class="nav-item"><span class="icon">👤</span> Personal</div>
+
+  <div class="sidebar-bottom">
+    <div class="user-card">
+   
+
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <h1>Dashboard</h1>
+    <div class="topbar-actions">
+     <button class="btn btn-outline notif-btn" onclick="window.location.href='reminders.html'">
+  🔔 Reminders
+  <span id="alertBadge" class="badge">0</span>
+</button>
+
+      <button class="btn btn-primary" onclick="window.location.href='add-task.html'">+ New task</button>
+      <button class="btn btn-outline" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">5</div>
+        <div class="stat-label">Total tasks</div>
+        <div class="stat-dot" style="background:var(--accent)"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-done" style="color:var(--success)">1</div>
+        <div class="stat-label">Completed</div>
+        <div class="stat-dot" style="background:var(--success)"></div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">All tasks</span>
+      <div class="filter-tabs">
+        <button class="tab active" onclick="filterTasks('all',this)">All</button>
+        <button class="tab" onclick="filterTasks('pending',this)">Pending</button>
+        <button class="tab" onclick="filterTasks('done',this)">Done</button>
+      </div>
+    </div>
+
+    <div class="task-list" id="task-list"></div>
+  </div>
+</div>
+
+<script>
+  const user = localStorage.getItem("user_id");
+
+if (!user) {
+  window.location.href = "login.html";
+}
+function logout() {
+  console.log("Logout clicked");
+
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("email");
+  localStorage.removeItem("name");
+  localStorage.removeItem("session_type");
+
+  window.location.href = "login.html";
+}
+let tasks = [];
+
+async function loadTasks() {
+  const res = await fetch("http://localhost:3000/tasks");
+  tasks = await res.json();
+
+  renderTasks();
+}
+
+loadTasks();
+async function deleteTask(e, id) {
+  e.stopPropagation();
+
+  console.log("Deleting ID:", id);
+
+  const confirmDelete = confirm("Delete this task?");
+  if (!confirmDelete) return;
+
+  try {
+    const res = await fetch(`http://localhost:3000/delete-task/${id}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    console.log("Delete response:", data);
+
+    if (data.success) {
+      tasks = tasks.filter(t => t.id !== id);
+      renderTasks();
+    } else {
+      alert("Delete failed");
+    }
+
+  } catch (err) {
+    console.log("Frontend delete error:", err);
+    alert("Server error");
+  }
+}
+
+
+let currentFilter='all';
+
+function renderTasks(){
+  const list=document.getElementById('task-list');
+  const filtered=currentFilter==='all'?tasks:currentFilter==='done'?tasks.filter(t=>t.done):tasks.filter(t=>!t.done);
+  if(!filtered.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">✓</div><div>No tasks here</div></div>';
+    return;
+  }
+  list.innerHTML=filtered.map((t,i)=>`
+    <div class="task-card" style="animation-delay:${i*0.05}s" onclick="window.location.href='add-task.html'">
+      <div class="priority-dot ${t.priority}"></div>
+      <div class="task-check ${t.done?'checked':''}" onclick="toggleDone(event,${t.id})"></div>
+      <div class="task-body">
+        <div class="task-title ${t.done?'done':''}">${t.title}</div>
+        <div class="task-meta">
+          <button onclick="deleteTask(event, ${t.id})" style="
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+">
+Delete
+</button>
+          <span class="task-tag ${t.tagClass}">${t.tag}</span>
+          <span class="deadline ${t.deadlineClass}">⏰ ${t.deadline}</span>
+          ${t.attach?'<span>📎 1 file</span>':''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  updateStats();
+}
+
+async function toggleDone(e, id) {
+  e.stopPropagation();
+
+  // 🔥 1. Update UI instantly
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  task.done = !task.done;
+  renderTasks();
+
+  // 🔥 2. Update database
+  try {
+    await fetch("http://localhost:3000/update-task-status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id,
+        status: task.done ? "completed" : "pending"
+      })
+    });
+
+    // 🔥 3. Update reminder badge
+    loadAlertCount();
+
+  } catch (err) {
+    console.log("Error updating task:", err);
+  }
+}
+function filterTasks(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function updateStats(){
+  const done=tasks.filter(t=>t.done).length;
+  document.getElementById('stat-total').textContent=tasks.length;
+  document.getElementById('stat-done').textContent=done;
+  document.getElementById('total-badge').textContent=tasks.filter(t=>!t.done).length;
+}
+function logout() {
+  // clear session data
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("email");
+  localStorage.removeItem("name");
+  localStorage.removeItem("session_type");
+
+  // redirect to login page
+  window.location.href = "login.html";
+}
+renderTasks();
+
+function completeTask(id) {
+  fetch("http://localhost:3000/update-task-status", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: id,
+      status: "completed"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Updated:", data);
+    loadTasks(); // refresh UI
+  });
+}
+
+async function loadAlertCount() {
+  const res = await fetch("http://localhost:3000/api/pending-count");
+  const data = await res.json();
+
+  const badge = document.getElementById("alertBadge");
+
+  if (!badge) return;
+
+  const count = Number(data.count);
+
+  badge.innerText = count;
+  badge.style.display = count === 0 ? "none" : "flex";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadAlertCount();
+
+  // 🔥 ensures update after coming back from add-task page
+  loadAlertCount();
+});
+
+document.addEventListener("task-updated", loadAlertCount);
+document.addEventListener("DOMContentLoaded", loadAlertCount);
+</script>
+</body>
+</html>
