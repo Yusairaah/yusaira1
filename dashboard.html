@@ -287,7 +287,7 @@ function logout() {
 let tasks = [];
 
 async function loadTasks() {
-  const res = await fetch("http://localhost:3000/tasks");
+  const res = await fetch("https://your-backend.azurewebsites.net/tasks");
   tasks = await res.json();
 
   renderTasks();
@@ -303,7 +303,7 @@ async function deleteTask(e, id) {
   if (!confirmDelete) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/delete-task/${id}`, {
+    const res = await fetch(`https://your-backend.azurewebsites.net/delete-task/${id}`, {
       method: "DELETE"
     });
 
@@ -374,7 +374,7 @@ async function toggleDone(e, id) {
 
   // 🔥 2. Update database
   try {
-    await fetch("http://localhost:3000/update-task-status", {
+    await fetch("https://your-backend.azurewebsites.net/update-task-status", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -418,7 +418,7 @@ function logout() {
 renderTasks();
 
 function completeTask(id) {
-  fetch("http://localhost:3000/update-task-status", {
+  fetch("https://your-backend.azurewebsites.net/update-task-status", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -436,7 +436,7 @@ function completeTask(id) {
 }
 
 async function loadAlertCount() {
-  const res = await fetch("http://localhost:3000/api/pending-count");
+  const res = await fetch("https://your-backend.azurewebsites.net/api/pending-count");
   const data = await res.json();
 
   const badge = document.getElementById("alertBadge");
