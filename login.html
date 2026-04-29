@@ -177,6 +177,11 @@ h1{font-family:'DM Serif Display',serif;font-size:30px;line-height:1.15;margin-b
 
 </div>
 
+<!-- your HTML content above -->
+
+<button onclick="loginUser()">Login</button>
+
+<!-- ⚠️ ADD SCRIPT HERE -->
 <script>
 async function loginUser() {
   const email = document.getElementById("email").value;
@@ -207,7 +212,6 @@ async function loginUser() {
   }
 }
 
-// 👤 Guest mode (optional improvement for your UI button)
 function guestLogin() {
   localStorage.setItem("session_type", "guest");
   localStorage.setItem("email", "guest@taskflow");
@@ -219,9 +223,10 @@ function showLoader(e){
   e.preventDefault();
   document.getElementById('loader').classList.add('show');
   setTimeout(()=>{ window.location.href='dashboard.html'; },1400);
-
 }
-
 </script>
+
+</body>
+</html>
 </body>
 </html>
