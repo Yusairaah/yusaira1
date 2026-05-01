@@ -69,10 +69,10 @@ async function uploadFile() {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("https:backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/upload", {
-    method: "POST",
-    body: formData
-  });
+  const res = await fetch("https://backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/upload", {
+  method: "POST",
+  body: formData
+});
 
   const data = await res.json();
 
