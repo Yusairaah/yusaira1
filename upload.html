@@ -61,10 +61,15 @@ img {
 async function uploadFile() {
   const file = document.getElementById("fileInput").files[0];
 
+  if (!file) {
+    alert("Please select a file");
+    return;
+  }
+
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("/upload", {
+  const res = await fetch("https:backendremappyusaira-cvdbf5dthtc8frbx.belgiumcentral-01.azurewebsites.net/upload", {
     method: "POST",
     body: formData
   });
@@ -73,6 +78,7 @@ async function uploadFile() {
 
   if (data.success) {
     document.getElementById("preview").src = data.url;
+    console.log("Uploaded URL:", data.url);
   } else {
     alert("Upload failed");
   }
